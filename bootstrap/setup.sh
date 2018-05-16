@@ -2,6 +2,8 @@
 
 set -eu -o pipefail
 
+publicKey="CHANGEME"
+
 main(){
     ensureGroup
     ensureUser
@@ -50,11 +52,11 @@ ensureUser(){
 
 # Add public key to authorized keys
 addAuthorizedPublicKey(){
-    local publicKey="ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAvb7oAigUAxPJ0+oMEqxFf1pv2Jo3p7x50RuKkkI5zdJ170vqfQB6SzmCBlTl75lyT3Xune2u3uIF0sAomRPDeQYbVfGU8T2jl3JoZ4kr1YH26B0KlmZbU85P70a+kdFDs9/brj3MHPIWWSEi9BaL/T6cGni4HWAL7+ElCjqbGLh9MRoHwsxKb/BAQOU80Ea9mQp/A8h445h8KcMLFC3UhHKNYJFevrrBF6weH5K2y15BLB0yWDjiTX2v94R7coW1oj5ofLdgh2GJcwgB2diYw2jSC0eWTicI9dtuOLYEmMnDpr6Ff4+VRFYQJReuug2U0izLv5w/nT8P45WOVa0m8w== aku105@DELAKU10541878"
-
     # Covering bases if /home/ansible/.ssh didn't exist
     mkdir -p /home/ansible/.ssh && chmod 700 /home/ansible/.ssh
-    touch /home/ansible/.ssh/authorized_keys && chmod 600 /home/ansible/.ssh/authorized_keys
+    touch /home/ansible/.ssh/authorized_keys && \
+      chmod 600 /home/ansible/.ssh/authorized_keys && \
+      chown -R ansible.ansible /home/ansible/
 
     echo $publicKey >> /home/ansible/.ssh/authorized_keys
     info "Added public key to authorized keys."
@@ -69,17 +71,11 @@ ensurePython(){
         info "$python_version already installed."
         isPythonPresent="true"
     fi
-    # Check python3
-    if [ -n "$(which python3)" ]; then
-        local python_version=$(python3 -V)
-        info "$python_version already installed."
-        isPythonPresent="true"
-    fi
 
-    # Install python3 if not installed
+    # Install python2 if not installed
     if [ $isPythonPresent == "false" ]; then
         apt-get update
-        apt-get install -y python3
+        apt-get install -y python
         info "Installation finished."
     fi
 }
